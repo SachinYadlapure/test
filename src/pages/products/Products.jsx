@@ -1,102 +1,124 @@
 import {
   Box,
+  Button,
   Flex,
   Heading,
-  ListItem,
+  Image,
+  Stack,
   Text,
-  UnorderedList,
+  VStack,
 } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { getProducts } from '../../redux/action/productAction';
-import ProductCard from './ProductCard';
-import { useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const Products = () => {
-  const dispatch = useDispatch();
-  const { data } = useSelector(state => state.product);
+  const [data, setData] = useState([]);
+  const [filter, setFilter] = useState(data);
+  const [loading, setLoading] = useState(false);
 
-  const [category, setCategory] = useState('');
-
-  const { keyword } = useParams();
-
-  const getData = (data, property) => {
-    let newVal =
-      data &&
-      data.map(cat => {
-        return cat[property];
-      });
-
-    return [...new Set(newVal)];
-  };
-
-  const categoryData = getData(data, 'category');
+  let mounted = true;
 
   useEffect(() => {
-    dispatch(getProducts(keyword, category));
-  }, [dispatch, keyword, category]);
+    const getProducts = async () => {
+      setLoading(true);
+      const res = await fetch('https://fakestoreapi.com/products');
+      if (mounted) {
+        setData(await res.clone().json());
+        setFilter(await res.json());
+        setLoading(false);
+      }
+      return () => {
+        mounted = false;
+      };
+    };
+
+    getProducts();
+  }, [mounted]);
+  const Loading = () => {
+    return <>Loading....</>;
+  };
+
+  const filterProduct = cat => {
+    const updatedList = data.filter(elem => elem.category === cat);
+    setFilter(updatedList);
+  };
+
+  const ShowFilters = () => {
+    return (
+      <Box>
+        <Button mx={'8'} onClick={() => setFilter(data)}>
+          All
+        </Button>
+        <Button mx={'8'} onClick={() => filterProduct("men's clothing")}>
+          Men's Cloths
+        </Button>
+        <Button mx={'8'} onClick={() => filterProduct("women's clothing")}>
+          Women's Cloths
+        </Button>
+        <Button mx={'8'} onClick={() => filterProduct('jewelery')}>
+          Jewelery
+        </Button>
+        <Button mx={'8'} onClick={() => filterProduct('electronics')}>
+          Electronic
+        </Button>
+      </Box>
+    );
+  };
 
   return (
-    <Box mt={'80px'} h={'full'}>
-      <Heading
-        textTransform={'uppercase'}
-        pt={'5'}
-        pb={'5'}
-        textAlign={'center'}
-        // borderBottom="1px "
-        margin={'auto'}
-      >
-        Products
-      </Heading>
+    <>
+      <Box pt={'24'}>
+        <Heading
+          textTransform={'uppercase'}
+          textAlign={'center'}
+          // margin={'auto'}
+        >
+          Products
+        </Heading>
+        <hr />
+        <VStack pt={'6'} pb={'6'}>
+          {loading ? <Loading /> : <ShowFilters />}
+        </VStack>
+      </Box>
+
       <Flex
-        ml={['unset', '15vmax']}
         flexWrap={'wrap'}
         justifyContent={'center'}
-        minH={'30vh'}
+        ml={'56'}
+        mr={'20'}
+        mt={'auto'}
       >
-        {data &&
-          data.map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+        {filter.map(product => (
+          <Stack>
+            <Box
+              w={'60'}
+              h={'md'}
+              m={'1'}
+              border={'1px solid pink'}
+              boxShadow={'xl'}
+            >
+              <Box margin={'3vmax'}>
+                <Link
+                  style={{ textDecoration: 'none' }}
+                  to={`/products/${product.id}`}
+                >
+                  <Image
+                    w={['unset', '14vmax']}
+                    src={product.image}
+                    alt={product.title}
+                    objectFit={'contain'}
+                  />
+                </Link>
+              </Box>
+              <Text align={'center'}>{product.title.substring(0, 12)}</Text>
+              <Text align={'center'} color={['white', 'unset']} mb={'2vmax'}>
+                PRICE : {`₹${product.price}`}
+              </Text>
+            </Box>
+          </Stack>
+        ))}
       </Flex>
-      <Box
-        visibility={'visible'}
-        w={['20vmax', '10vmax']}
-        position={['fixed', 'absolute']}
-        top={'10vmax'}
-        left={'4vmax'}
-      >
-        <Text
-          color={['white', 'unset']}
-          fontWeight={'bold'}
-          textTransform={'uppercase'}
-          pt={'5'}
-        >
-          Categories
-        </Text>
-        <UnorderedList pb={'5'} pt={'5'}>
-          {categoryData &&
-            categoryData.map(category => (
-              <ListItem
-                p={'4'}
-                fontSize={['unset', 'md']}
-                textTransform={'uppercase'}
-                cursor={'pointer'}
-                listStyleType={'none'}
-                color={['white', 'unset']}
-                _hover={{
-                  color: 'red',
-                }}
-                key={category}
-                onClick={() => setCategory(category)}
-                value={category}
-              >
-                {category}
-              </ListItem>
-            ))}
-        </UnorderedList>
-      </Box>
-    </Box>
+    </>
   );
 };
 

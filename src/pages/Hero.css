@@ -1,0 +1,10 @@
+.graphics {
+  filter: drop-shadow(0 40px 20px);
+  animation: vectorAnimation 1s infinite ease-in-out alternate;
+}
+
+@keyframes vectorAnimation {
+  to {
+    transform: translateY(-10px);
+  }
+}

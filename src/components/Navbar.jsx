@@ -41,8 +41,18 @@ const Navbar = () => {
       >
         <Flex align={'center'} display={['none', 'none', 'flex', 'flex']}>
           <Link to={'/'}>
-            <Button color={'white'} variant="link" bg={'coral'} mx={40}>
+            <Button color={'white'} variant="link" bg={'coral'} mx={4}>
               Home
+            </Button>
+          </Link>
+          <Link to={'/about'}>
+            <Button color={'white'} variant="link" bg={'coral'} mx={16}>
+              About
+            </Button>
+          </Link>
+          <Link to={'/contact'}>
+            <Button color={'white'} variant="link" bg={'coral'} mx={16}>
+              Contact
             </Button>
           </Link>
           {isAuthenticated && (
@@ -80,7 +90,7 @@ const Navbar = () => {
                 onChange={e => setKeyword(e.target.value)}
                 // type="submit"
                 placeholder="Search a products"
-                w={['60', '3xl']}
+                w={['60', '2xl']}
                 size={['md', 'md']}
                 borderRadius={'md'}
                 border={'2px'}
